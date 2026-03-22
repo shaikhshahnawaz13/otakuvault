@@ -1,0 +1,40 @@
+{
+  "name": "otakuvault",
+  "version": "1.0.0",
+  "description": "An anime tracking and community platform — track shows, write reviews, and discuss with other otakus.",
+  "homepage": "https://otakuvault.netlify.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shaikhshahnawaz13/otakuvault"
+  },
+  "author": "Shahnawaz Shaikh",
+  "license": "MIT",
+  "scripts": {
+    "start": "npx serve .",
+    "lint": "npx htmlhint index.html",
+    "validate": "npx html-validate index.html"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.2.3",
+    "htmlhint": "^1.1.4"
+  },
+  "cdn_dependencies": {
+    "@supabase/supabase-js": "2.49.4",
+    "xlsx": "0.18.5",
+    "google-fonts": "Bebas Neue, Nunito"
+  },
+  "external_apis": {
+    "jikan": "https://api.jikan.moe/v4 — MyAnimeList unofficial REST API (no key required)",
+    "supabase": "https://supabase.com — Auth, database, and file storage"
+  },
+  "keywords": [
+    "anime",
+    "tracker",
+    "community",
+    "otaku",
+    "myanimelist",
+    "supabase",
+    "vanilla-js"
+  ]
+}

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OtakuVault</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<meta name="google-site-verification" content="6j9tGTxK8JDa69bPUHsuyD6oh6TPamQ6l6CcIIrsZ84" />
+<meta name="description" content="OtakuVault is an anime tracking and community platform where fans track shows, review anime, and discuss with other otakus.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">OTAKU<span>VAULT</span></div>
+    <div class="auth-sub">The anime community — track, review, discuss</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuth('signup')">Sign Up</button>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+    <div id="login-form">
+      <div class="field"><label>Email or Username</label><input type="text" id="l-email" placeholder="your@email.com or username" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+      <button class="btn-full" onclick="doLogin()">Login</button>
+    </div>
+    <div id="signup-form" style="display:none">
+      <div class="field"><label>Username</label><input type="text" id="s-user" placeholder="your_username"></div>
+      <div class="field"><label>Email</label><input type="email" id="s-email" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="s-pass" placeholder="min 6 characters"></div>
+      <button class="btn-full" onclick="doSignup()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="logo">OTAKU<span>VAULT</span></div>
+    <nav>
+      <button class="nav-btn active" onclick="showPage('trending',this)">🔥 <span class="nl">Trending</span></button>
+      <button class="nav-btn" onclick="showPage('search',this)">🔍 <span class="nl">Search</span></button>
+      <button class="nav-btn" onclick="showPage('threads',this)">💬 <span class="nl">Threads</span></button>
+      <button class="nav-btn" onclick="showPage('mylist',this)">📋 <span class="nl">My List</span></button>
+      <button class="nav-btn" id="admin-nav-btn" style="display:none" onclick="showPage('admin',this)">🛡 <span class="nl">Admin</span></button>
+      <button class="nav-btn" id="profile-nav-btn" onclick="showPage('profile',this)">👤 <span class="nl">Profile</span></button>
+    </nav>
+    <div class="header-right">
+      <div class="qs-wrap">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--muted);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search..." id="qs" onkeypress="if(event.key==='Enter')qs_go()">
+      </div>
+      <div class="user-chip" onclick="showPage('profile',document.getElementById('profile-nav-btn'))">
+        <div class="avatar" id="user-av">?</div>
+        <span id="user-name">...</span>
+      </div>
+    </div>
+  </header>
+  <main>
+    <!-- TRENDING -->
+    <div class="page active" id="page-trending">
+      <div class="sec-title">TRENDING</div>
+      <div class="trend-stats" id="trend-stats">
+        <div class="stat-card"><div class="stat-label">Community Members</div><div class="stat-val" id="stat-members">—</div></div>
+        <div class="stat-card"><div class="stat-label">Anime Tracked</div><div class="stat-val" id="stat-tracked">—</div></div>
+        <div class="stat-card"><div class="stat-label">Reviews Written</div><div class="stat-val" id="stat-reviews">—</div></div>
+        <div class="stat-card"><div class="stat-label">Threads Active</div><div class="stat-val" id="stat-threads">—</div></div>
+      </div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="loadTrending('airing',this)">Airing Now</button>
+        <button class="tab-btn" onclick="loadTrending('bypopularity',this)">Most Popular</button>
+        <button class="tab-btn" onclick="loadTrending('favorite',this)">All Time</button>
+      </div>
+      <div id="trending-grid"></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="page" id="page-search">
+      <div class="sec-title">SEARCH</div>
+      <div style="max-width:640px;margin-bottom:1.5rem;">
+        <div style="display:flex;gap:0.7rem;align-items:center;margin-bottom:1rem;">
+          <div class="big-search" style="flex:1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--muted);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="search-q" placeholder="Search anime by title..." onkeypress="if(event.key==='Enter')doSearch()"></div>
+          <button class="btn-accent" onclick="doSearch()">Search</button>
+        </div>
+        <div style="margin-bottom:0.6rem;">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:0.65rem;">Quick search</div>
+          <div id="suggestion-chips" style="display:flex;flex-wrap:wrap;gap:0.5rem;"></div>
+        </div>
+      </div>
+      <div id="search-discover">
+        <div class="sec-title" style="font-size:1.3rem;margin-bottom:1rem;">POPULAR RIGHT NOW</div>
+        <div id="search-popular-grid"></div>
+      </div>
+      <div id="search-results-wrap" style="display:none;">
+        <div class="sec-title" style="font-size:1.3rem;margin-bottom:1rem;" id="search-results-title">RESULTS</div>
+        <div id="search-grid"></div>
+      </div>
+    </div>
+
+    <!-- THREADS -->
+    <div class="page" id="page-threads">
+      <div id="threads-list-view">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;">
+          <div class="sec-title" style="margin-bottom:0;">COMMUNITY THREADS</div>
+          <button class="new-thread-btn" style="margin-bottom:0;" onclick="openNewThread()">+ New Thread</button>
+        </div>
+        <div id="threads-featured" style="margin-bottom:1.5rem;"></div>
+        <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:0.8rem;">ALL THREADS</div>
+        <div id="threads-container"></div>
+      </div>
+      <div id="thread-detail">
+        <button class="back-btn" onclick="backToThreads()">← Back to Threads</button>
+        <div id="thread-detail-content"></div>
+      </div>
+    </div>
+
+    <!-- MY LIST -->
+    <div class="page" id="page-mylist">
+      <div class="sec-title">MY LIST</div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="filterMyList('all',this)">All</button>
+        <button class="tab-btn" onclick="filterMyList('watching',this)">Watching</button>
+        <button class="tab-btn" onclick="filterMyList('completed',this)">Completed</button>
+        <button class="tab-btn" onclick="filterMyList('plan',this)">Plan to Watch</button>
+      </div>
+      <div id="mylist-container"></div>
+      <div style="height:1rem;"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+
+      <!-- Main profile card with banner -->
+      <div class="profile-card">
+        <div class="profile-banner" id="profile-banner" style="background:#e63946;"></div>
+        <div class="profile-card-body">
+          <div class="profile-top">
+            <div class="pfp-wrap">
+              <div class="pfp-big" id="pfp-big-wrap"><span id="pfp-initials">?</span></div>
+              <div class="pfp-edit-btn" title="Change photo">📷<input type="file" accept="image/*" id="pfp-file-input" onchange="uploadPfp(this)"></div>
+            </div>
+            <div class="profile-name-col">
+              <div class="profile-username" id="profile-username-display">—</div>
+              <div id="profile-title-display"></div>
+              <div class="profile-username-lock">🔒 Username is permanent</div>
+            </div>
+          </div>
+          <!-- Watch goal bar -->
+          <div id="goal-section" style="display:none;margin-bottom:0.5rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">
+              <span style="font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Yearly Goal</span>
+              <span style="font-size:0.75rem;font-weight:700;" id="goal-label">0 / 0</span>
+            </div>
+            <div class="goal-bar-wrap"><div class="goal-bar-fill" id="goal-bar" style="width:0%"></div></div>
+          </div>
+          <!-- Bio preview -->
+          <div id="profile-bio-display" style="font-size:0.82rem;color:var(--muted);font-style:italic;line-height:1.45;min-height:1rem;"></div>
+          <!-- Stats -->
+          <div class="profile-stats-row">
+            <div class="p-stat"><div class="p-stat-val" id="ps-tracked">0</div><div class="p-stat-lbl">Tracked</div></div>
+            <div class="p-stat"><div class="p-stat-val" id="ps-watching">0</div><div class="p-stat-lbl">Watching</div></div>
+            <div class="p-stat"><div class="p-stat-val" id="ps-completed">0</div><div class="p-stat-lbl">Completed</div></div>
+            <div class="p-stat"><div class="p-stat-val" id="ps-reviews">0</div><div class="p-stat-lbl">Reviews</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pinned Anime -->
+      <div class="profile-section-card">
+        <div class="profile-section-label">Pinned Anime <span style="font-size:0.65rem;color:var(--muted);text-transform:none;letter-spacing:0;">(up to 6)</span></div>
+        <div class="pinned-anime-grid" id="pinned-anime-grid"></div>
+        <div id="pin-search-section" style="display:none;margin-top:0.9rem;border-top:1px solid var(--border);padding-top:0.9rem;">
+          <div class="pin-search-wrap">
+            <input class="pin-search-input" id="pin-search-input" placeholder="Search anime to pin..." onkeypress="if(event.key==='Enter')searchPinAnime()">
+            <button class="btn-accent" style="padding:0.4rem 0.9rem;font-size:0.82rem;" onclick="searchPinAnime()">Search</button>
+          </div>
+          <div id="pin-search-results"></div>
+        </div>
+      </div>
+
+      <!-- Bio -->
+      <div class="profile-section-card">
+        <div class="profile-section-label">Bio</div>
+        <div class="profile-bio-row">
+          <textarea class="profile-bio-input" id="profile-bio-input" maxlength="120" placeholder="Write something about yourself..."></textarea>
+          <button class="btn-accent" style="padding:0.5rem 1rem;font-size:0.82rem;" onclick="saveBio()">Save</button>
+        </div>
+      </div>
+
+      <!-- Banner colour -->
+      <div class="profile-section-card">
+        <div class="profile-section-label">Banner Colour</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;" id="banner-colour-grid"></div>
+      </div>
+
+      <!-- Watching goal -->
+      <div class="profile-section-card">
+        <div class="profile-section-label">Yearly Watching Goal</div>
+        <div style="display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;">
+          <input type="number" id="goal-input" min="1" max="365" placeholder="e.g. 50" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Nunito,sans-serif;font-size:0.9rem;padding:0.45rem 0.8rem;outline:none;width:110px;">
+          <button class="btn-accent" style="padding:0.45rem 1rem;font-size:0.82rem;" onclick="saveGoal()">Set Goal</button>
+          <button class="btn-ghost" style="padding:0.45rem 0.9rem;font-size:0.82rem;" onclick="clearGoal()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Favourite genres -->
+      <div class="profile-section-card">
+        <div class="profile-section-label">Favourite Genres <span style="font-size:0.65rem;color:var(--muted);text-transform:none;letter-spacing:0;">(pick up to 3)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;" id="genre-grid"></div>
+      </div>
+
+      <!-- Missions / Achievements -->
+      <div class="profile-section-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem;">
+          <div class="profile-section-label" style="margin-bottom:0;">Missions & Titles</div>
+          <div style="font-size:0.72rem;color:var(--muted);" id="ach-progress-lbl">—</div>
+        </div>
+        <div style="display:flex;gap:0.4rem;margin-bottom:0.9rem;flex-wrap:wrap;" id="ach-filter-row">
+          <button class="tab-btn active" style="font-size:0.72rem;padding:0.22rem 0.7rem;" onclick="filterAch('all',this)">All</button>
+          <button class="tab-btn" style="font-size:0.72rem;padding:0.22rem 0.7rem;" onclick="filterAch('earned',this)">Earned</button>
+          <button class="tab-btn rarity-rare" style="font-size:0.72rem;padding:0.22rem 0.7rem;" onclick="filterAch('rare',this)">Rare</button>
+          <button class="tab-btn rarity-epic" style="font-size:0.72rem;padding:0.22rem 0.7rem;" onclick="filterAch('epic',this)">Epic</button>
+          <button class="tab-btn rarity-legendary" style="font-size:0.72rem;padding:0.22rem 0.7rem;" onclick="filterAch('legendary',this)">Legendary</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;" id="achievements-list"></div>
+        <div id="ach-show-more-wrap" style="margin-top:0.8rem;text-align:center;display:none;">
+          <button id="ach-show-more-btn" onclick="toggleAllAch()" style="background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-family:Nunito,sans-serif;font-size:0.8rem;font-weight:700;padding:0.4rem 1.2rem;cursor:pointer;transition:all 0.2s;">Show All Titles ▼</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:0.2rem;">
+        <button class="btn-ghost" onclick="goMyList()">📋 View My List</button>
+        <button class="btn-ghost" style="border-color:rgba(230,57,70,0.3);color:var(--accent);" onclick="doLogout()">🚪 Log Out</button>
+      </div>
+
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="sec-title">ADMIN PANEL</div>
+      <div class="admin-stat-row">
+        <div class="admin-stat"><div class="admin-stat-label">Total Reviews</div><div class="admin-stat-val" id="a-stat-reviews">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Anime Tracked</div><div class="admin-stat-val" id="a-stat-tracked">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Users</div><div class="admin-stat-val" id="a-stat-users">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Anonymous Reviews</div><div class="admin-stat-val" id="a-stat-anon">—</div></div>
+      </div>
+      <div class="admin-tabs">
+        <button class="tab-btn active" onclick="adminTab('reviews',this)">Reviews</button>
+        <button class="tab-btn" onclick="adminTab('animelist',this)">Anime List</button>
+      </div>
+      <div id="admin-reviews-section">
+        <button class="export-btn" onclick="exportExcel('reviews')">⬇ Export Reviews (.xlsx)</button>
+        <div class="table-wrap"><table class="admin-table" id="admin-reviews-table">
+          <thead><tr><th>Date</th><th>User</th><th>Anime</th><th>Rating</th><th>Review</th><th>Anonymous</th></tr></thead>
+          <tbody id="admin-reviews-body"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:2rem">Loading...</td></tr></tbody>
+        </table></div>
+      </div>
+      <div id="admin-animelist-section" style="display:none">
+        <button class="export-btn" onclick="exportExcel('animelist')">⬇ Export Anime List (.xlsx)</button>
+        <div class="table-wrap"><table class="admin-table" id="admin-animelist-table">
+          <thead><tr><th>Date</th><th>User</th><th>Anime</th><th>Type</th><th>Status</th><th>Rating</th><th>MAL Score</th></tr></thead>
+          <tbody id="admin-animelist-body"><tr><td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">Loading...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ACHIEVEMENT UNLOCK TOAST -->
+<div class="achievement-unlock-toast" id="ach-toast">
+  <span class="au-icon" id="ach-toast-icon">🏆</span>
+  <div class="au-unlocked">Title Unlocked!</div>
+  <div class="au-title" id="ach-toast-title">—</div>
+  <div class="au-desc" id="ach-toast-desc">—</div>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="bn-btn active" onclick="showPage('trending',this);syncBottomNav(this)" data-page="trending"><span class="bn-icon">🔥</span>Trending</button>
+  <button class="bn-btn" onclick="showPage('search',this);syncBottomNav(this)" data-page="search"><span class="bn-icon">🔍</span>Search</button>
+  <button class="bn-btn" onclick="showPage('threads',this);syncBottomNav(this)" data-page="threads"><span class="bn-icon">💬</span>Threads</button>
+  <button class="bn-btn" onclick="showPage('mylist',this);syncBottomNav(this)" data-page="mylist"><span class="bn-icon">📋</span>My List</button>
+  <button class="bn-btn" id="bn-admin-btn" style="display:none" onclick="showPage('admin',this);syncBottomNav(this)" data-page="admin"><span class="bn-icon">🛡</span>Admin</button>
+  <button class="bn-btn" onclick="showPage('profile',this);syncBottomNav(this)" data-page="profile"><span class="bn-icon">👤</span>Profile</button>
+</div>
+
+<!-- ANIME MODAL -->
+<div class="overlay" id="anime-overlay" onclick="if(event.target===this)closeAnimeModal()">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-poster"><img id="m-img" src="" alt=""></div>
+      <div class="modal-info">
+        <div class="m-title" id="m-title">Loading...</div>
+        <div class="m-title-en" id="m-en"></div>
+        <div class="m-pills" id="m-pills"></div>
+        <div class="m-synopsis" id="m-synopsis"></div>
+      </div>
+    </div>
+    <div class="modal-bottom">
+      <div class="mlabel">Track Status</div>
+      <div class="status-row">
+        <button class="sbtn" id="sb-w" onclick="setStatus('watching')">👁 Watching</button>
+        <button class="sbtn" id="sb-c" onclick="setStatus('completed')">✅ Completed</button>
+        <button class="sbtn" id="sb-p" onclick="setStatus('plan')">🕐 Plan to Watch</button>
+      </div>
+      <div class="mlabel">Your Rating</div>
+      <div class="star-row" id="star-row">
+        <span class="star" data-n="1">★</span><span class="star" data-n="2">★</span>
+        <span class="star" data-n="3">★</span><span class="star" data-n="4">★</span><span class="star" data-n="5">★</span>
+      </div>
+      <div class="mlabel">Your Review</div>
+      <textarea class="review-ta" id="m-review" placeholder="Share your thoughts..."></textarea>
+      <div class="anon-row">
+        <div class="toggle" id="anon-tog" onclick="this.classList.toggle('on')"></div>
+        <label>Post anonymously</label>
+      </div>
+      <div class="action-row">
+        <button class="btn-ghost" onclick="removeFromList()">Remove</button>
+        <button class="btn-save" onclick="saveAnime()">Save to List</button>
+      </div>
+      <div class="reviews-section">
+        <div class="mlabel" style="margin-top:0">Community Reviews</div>
+        <div id="community-reviews"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW THREAD MODAL -->
+<div class="overlay" id="thread-overlay" onclick="if(event.target===this)closeThreadModal()">
+  <div class="modal" style="max-width:520px;">
+    <div style="padding:1.4rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:1.2rem;">NEW THREAD</div>
+      <div class="form-field"><label>Title</label><input type="text" id="t-title" placeholder="What do you want to discuss?"></div>
+      <div class="form-field"><label>Body (optional)</label><textarea id="t-body" placeholder="Share more details..."></textarea></div>
+      <div class="form-field"><label>Anime (optional — search to link)</label><input type="text" id="t-anime" placeholder="e.g. Naruto, Attack on Titan..."></div>
+      <div class="anon-row" style="margin-bottom:1rem;">
+        <div class="toggle" id="thread-anon-tog" onclick="this.classList.toggle('on')"></div>
+        <label style="font-size:0.82rem;color:var(--muted);">Post anonymously</label>
+      </div>
+      <div style="display:flex;gap:0.6rem;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="closeThreadModal()">Cancel</button>
+        <button class="btn-save" onclick="submitThread()">Post Thread</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- External Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<!-- App Logic -->
+<script src="script.js"></script>
+</body>
+</html>

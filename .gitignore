@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Build output
+dist/
+build/
+.cache/
+.parcel-cache/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Supabase local dev
+.supabase/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp

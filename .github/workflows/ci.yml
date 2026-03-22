@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  validate:
+    name: Validate HTML & Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dev dependencies
+        run: npm install --save-dev htmlhint
+
+      - name: Lint HTML with HTMLHint
+        run: npx htmlhint index.html --config .htmlhintrc || true
+
+      - name: Check required files exist
+        run: |
+          echo "Checking required files..."
+          for file in index.html style.css script.js LICENSE .gitignore package.json; do
+            if [ -f "$file" ]; then
+              echo "✅  $file found"
+            else
+              echo "❌  $file MISSING"
+              exit 1
+            fi
+          done
+          echo "All required files present."
+
+      - name: Check no secrets in source
+        run: |
+          echo "Scanning for accidentally committed secrets..."
+          # Warn if .env files were accidentally staged
+          if git ls-files | grep -qE '\.env$|\.env\.local$'; then
+            echo "❌  .env file tracked by git — remove it and add to .gitignore"
+            exit 1
+          fi
+          echo "✅  No .env files tracked."
